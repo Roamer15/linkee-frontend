@@ -18,7 +18,11 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Link2, Copy, Check } from 'lucide-react';
 import { AxiosError } from 'axios';
 
-export function CreateLinkDialog() {
+interface CreateLinkDialogProps {
+  children?: React.ReactNode;
+}
+
+export function CreateLinkDialog({ children }: CreateLinkDialogProps) {
   const [open, setOpen] = useState(false);
   const [originalUrl, setOriginalUrl] = useState('');
   const [customCode, setCustomCode] = useState('');
@@ -79,10 +83,12 @@ export function CreateLinkDialog() {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => (isOpen ? setOpen(true) : handleClose())}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Link
-        </Button>
+        {children || (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Link
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
