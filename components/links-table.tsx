@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ import {
   MoreHorizontal,
   Calendar,
   TrendingUp,
+  ImageIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -68,6 +70,28 @@ function LinkCard({ link }: { link: LinkType }) {
     <Card className="hover:shadow-md transition-all hover:border-primary/50 group">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
+          {/* Preview Image */}
+          {link.previewImage && (
+            <div className="relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
+              <Image
+                src={link.previewImage}
+                alt={link.title || 'Link preview'}
+                fill
+                className="object-cover"
+                sizes="128px"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+          {!link.previewImage && (
+            <div className="relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center">
+              <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+          )}
+
           {/* Left side - Link info */}
           <div className="flex-1 min-w-0 space-y-3">
             {/* Title or original URL */}
@@ -79,7 +103,7 @@ function LinkCard({ link }: { link: LinkType }) {
                 href={link.originalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground truncate block max-w-[500px] hover:underline"
+                className="text-sm text-muted-foreground hover:text-foreground truncate block max-w-125 hover:underline"
               >
                 {link.originalUrl}
               </a>
@@ -171,19 +195,18 @@ function LinkCard({ link }: { link: LinkType }) {
                     Open Link
                   </a>
                 </DropdownMenuItem>
-                {link.qrCodeUrl && (
-                  <DropdownMenuItem asChild>
-                    <a
-                      href={link.qrCodeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="cursor-pointer"
-                    >
-                      <QrCode className="mr-2 h-4 w-4" />
-                      Download QR Code
-                    </a>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/qr/${link.shortCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download={`${link.shortCode}-qr.png`}
+                    className="cursor-pointer"
+                  >
+                    <QrCode className="mr-2 h-4 w-4" />
+                    Download QR Code
+                  </a>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600 focus:text-red-600">
                   Delete Link

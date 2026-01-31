@@ -62,7 +62,8 @@ export interface Link {
   isActive: boolean;
   expiresAt?: string;
   title?: string;
-  qrCodeUrl: string;
+  previewImage?: string;
+  qrCodeUrl?: string;
   clickCount: number;
   lastClickedAt?: string;
   createdAt: string;
