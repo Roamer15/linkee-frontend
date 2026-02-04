@@ -83,6 +83,12 @@ export interface CreateLinkResponse {
   shortUrl: string;
 }
 
+export interface UpdateLinkRequest {
+  originalUrl?: string;
+  title?: string;
+  isActive?: boolean;
+}
+
 // Analytics types
 export interface DeviceBreakdown {
   desktop: number;

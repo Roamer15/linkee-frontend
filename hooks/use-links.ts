@@ -4,6 +4,7 @@ import type {
   Link,
   CreateLinkRequest,
   CreateLinkResponse,
+  UpdateLinkRequest,
   AnalyticsOverview,
   TimeSeriesData,
   ReferrerData,
@@ -43,6 +44,26 @@ export function useCreateLink() {
   return useMutation({
     mutationFn: async (data: CreateLinkRequest): Promise<CreateLinkResponse> => {
       const response = await api.post('api/links', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: linkKeys.lists() });
+    },
+  });
+}
+
+export function useUpdateLink() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateLinkRequest;
+    }): Promise<Link> => {
+      const response = await api.patch(`api/links/${id}`, data);
       return response.data;
     },
     onSuccess: () => {

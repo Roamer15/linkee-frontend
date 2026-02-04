@@ -17,6 +17,7 @@ import {
   Calendar,
   TrendingUp,
   ImageIcon,
+  Pencil,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { EditLinkDialog } from '@/components/edit-link-dialog';
 import type { Link as LinkType } from '@/lib/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -38,6 +40,7 @@ interface LinksTableProps {
 
 function LinkCard({ link }: { link: LinkType }) {
   const [copied, setCopied] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const shortUrl = `${BASE_URL}/${link.shortCode}`;
 
   const handleCopy = async () => {
@@ -208,6 +211,10 @@ function LinkCard({ link }: { link: LinkType }) {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Link
+                </DropdownMenuItem>
                 <DropdownMenuItem className="text-red-600 focus:text-red-600">
                   Delete Link
                 </DropdownMenuItem>
@@ -216,6 +223,12 @@ function LinkCard({ link }: { link: LinkType }) {
           </div>
         </div>
       </CardContent>
+
+      <EditLinkDialog
+        link={link}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </Card>
   );
 }
