@@ -15,6 +15,7 @@ import type {
 
 export function useLogin() {
   const router = useRouter();
+  const { setUser } = useAuth();
 
   return useMutation({
     mutationFn: async (data: LoginRequest): Promise<LoginResponse> => {
@@ -23,6 +24,7 @@ export function useLogin() {
     },
     onSuccess: (data) => {
       tokenStorage.setTokens(data.access_token, data.refresh_token);
+      setUser(data.user);
       router.push('/dashboard');
     },
   });
@@ -89,7 +91,7 @@ export function useLogout() {
 }
 
 export function useGoogleAuth() {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const initiateGoogleAuth = () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
