@@ -72,6 +72,19 @@ export function useUpdateLink() {
   });
 }
 
+export function useDeleteLink() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await api.delete(`api/links/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: linkKeys.lists() });
+    },
+  });
+}
+
 // Analytics hooks
 export function useAnalyticsOverview(linkId: string) {
   return useQuery({

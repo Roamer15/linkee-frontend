@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,7 @@ import {
   TrendingUp,
   ImageIcon,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -27,8 +27,19 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { EditLinkDialog } from '@/components/edit-link-dialog';
+import { useDeleteLink } from '@/hooks/use-links';
 import type { Link as LinkType } from '@/lib/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -41,6 +52,9 @@ interface LinksTableProps {
 function LinkCard({ link }: { link: LinkType }) {
   const [copied, setCopied] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const deleteLink = useDeleteLink();
   const shortUrl = `${BASE_URL}/${link.shortCode}`;
 
   const handleCopy = async () => {
@@ -74,26 +88,18 @@ function LinkCard({ link }: { link: LinkType }) {
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           {/* Preview Image */}
-          {link.previewImage && (
-            <div className="relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
-              <Image
+          <div className="relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center">
+            {link.previewImage && !imageError ? (
+              <img
                 src={link.previewImage}
                 alt={link.title || 'Link preview'}
-                fill
-                className="object-cover"
-                sizes="128px"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
               />
-            </div>
-          )}
-          {!link.previewImage && (
-            <div className="relative w-32 h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center">
+            ) : (
               <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Left side - Link info */}
           <div className="flex-1 min-w-0 space-y-3">
@@ -215,7 +221,11 @@ function LinkCard({ link }: { link: LinkType }) {
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Link
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600 focus:text-red-600">
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
                   Delete Link
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -229,6 +239,37 @@ function LinkCard({ link }: { link: LinkType }) {
         open={editOpen}
         onOpenChange={setEditOpen}
       />
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Link</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this link? This action cannot be
+              undone. All analytics data for this link will also be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                deleteLink.mutate(link.id, {
+                  onSuccess: () => {
+                    toast.success('Link deleted successfully');
+                    setDeleteOpen(false);
+                  },
+                  onError: () => {
+                    toast.error('Failed to delete link');
+                  },
+                });
+              }}
+            >
+              {deleteLink.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
